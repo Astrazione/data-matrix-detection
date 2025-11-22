@@ -3,6 +3,11 @@ __pycache__/
 *.py[codz]
 *$py.class
 
+# custom
+yolo_dataset/
+source/
+models/
+
 # C extensions
 *.so
 
