@@ -1,13 +1,14 @@
-import os
 import shutil
 import random
 from glob import glob
 import yaml
 from pathlib import Path
 
-BASE_DIR = Path("DATASET_V2")
-OUTPUT_DIR = Path("yolo_dataset")
-RATIO = 0.8  # 80% на обучение, 20% на валидацию
+
+BASE_DIR = Path("source")
+INPUT_DIR = Path(f"{BASE_DIR}/DATASET_V2")
+OUTPUT_DIR = Path(f"{BASE_DIR}/yolo_dataset")
+RATIO = 0.8
 
 dirs = [
     OUTPUT_DIR / "images" / "train",
@@ -19,7 +20,7 @@ dirs = [
 for d in dirs:
     d.mkdir(parents=True, exist_ok=True)
 
-image_paths = list(BASE_DIR.glob("*.jpg")) + list(BASE_DIR.glob("*.jpeg")) + list(BASE_DIR.glob("*.png"))
+image_paths = list(INPUT_DIR.glob("*.jpg")) + list(INPUT_DIR.glob("*.jpeg")) + list(INPUT_DIR.glob("*.png"))
 image_paths = [str(p) for p in image_paths]
 print(f"Найдено изображений: {len(image_paths)}")
 
@@ -27,7 +28,7 @@ print(f"Найдено изображений: {len(image_paths)}")
 valid_pairs = []
 for img_path in image_paths:
     stem = Path(img_path).stem
-    label_path = BASE_DIR / f"{stem}.txt"
+    label_path = INPUT_DIR / f"{stem}.txt"
     
     if label_path.exists():
         # Проверка содержимого аннотации
@@ -53,8 +54,7 @@ def fix_annotations(label_path, output_path):
             continue
         
         cls_id = int(parts[0])
-        # ИСПРАВЛЕНИЕ: если QR-код должен быть классом 0
-        # (в вашем примере был класс 15, что нестандартно)
+        # FIX: если datamatrix должен быть классом 0
         fixed_cls = 0 if cls_id == 15 else cls_id
         
         # Нормализация координат в [0,1]
@@ -95,7 +95,7 @@ dataset_yaml = {
     'train': 'images/train',
     'val': 'images/val',
     'names': {
-        0: 'qr_code'  # Единственный класс
+        0: 'data_matrix'  # Единственный класс
     }
 }
 

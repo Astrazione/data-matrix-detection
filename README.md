@@ -1,1 +1,1 @@
-# qr-codes
+# data-matrix-detector

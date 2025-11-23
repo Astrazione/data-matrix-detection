@@ -1,33 +1,25 @@
-from ultralytics import YOLO
+from ultralytics import YOLO # type: ignore
+import torch
 
-# 1. Загрузка предобученной модели YOLOv8s
-model = YOLO('yolov8s.pt')  # Можно использовать 'yolov8n.pt' для более легкой версии
+DATASET_PATH = 'source/yolo_dataset/dataset.yaml'
 
-results = model.train(
-    data='dataset.yaml',     # Путь к вашему YAML-файлу с датасетом
-    epochs=100,              # Количество эпох
-    batch=16,                # Размер батча (уменьшите при нехватке памяти)
-    imgsz=640,               # Размер изображений для обучения
-    name='qr_detector',      # Название проекта
-    patience=15,             # Ранняя остановка при отсутствии прогресса
-    optimizer='AdamW',       # Оптимизатор (можно использовать 'SGD')
-    lr0=0.01,                # Начальный learning rate
-    lrf=0.01,                # Финальный learning rate
-    dropout=0.2,             # Dropout для регуляризации
-    augment=True,            # Включение аугментаций (повороты, обрезка и т.д.)
-    hsv_h=0.015,             # Аугментация: оттенок
-    hsv_s=0.7,               # Аугментация: насыщенность
-    hsv_v=0.4,               # Аугментация: яркость
-    degrees=15.0,            # Максимальный угол поворота
-    translate=0.1,           # Сдвиг изображения
-    scale=0.5,               # Масштабирование
-    fliplr=0.5,              # Вероятность горизонтального отражения
-    mosaic=1.0,              # Вероятность использования мозаичной аугментации
-    workers=8                # Количество потоков загрузки данных
-)
+def train():
+    device = "cuda" if torch.cuda.is_available() else "cpu"
+    print(f"Обучение на устройстве: {device}")
 
-metrics = model.val()
+    model = YOLO('models/yolo12s.pt')
+    results = model.train(
+        data=DATASET_PATH,
+        epochs=100,
+        batch=16,
+        name='data_matrix_detector-12',
+        project='models',
+        augment=True,
+        degrees=25.0,
+        translate=0.05,
+        scale=0.1,
+        amp=False
+    )
 
-model.save('best_qr_detector.pt')
-
-results = model.predict('test_image.jpg', save=True, conf=0.5)
+if __name__ == '__main__':
+    train()
